@@ -1,11 +1,12 @@
 package com.example.testplugin;
 
 public enum AnnotationEnum {
-    HELLO_WORLD("org.example.HelloWorld");
+    HELLO_WORLD("org.example.HelloWorld"),
+    LOG_IT("org.example.LogIt");
 
     private final String fqn;
 
-    private AnnotationEnum(String fqn) {
+    AnnotationEnum(String fqn) {
         this.fqn = fqn;
     }
 

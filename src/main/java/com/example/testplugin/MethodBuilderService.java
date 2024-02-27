@@ -1,8 +1,7 @@
 package com.example.testplugin;
 
-import com.intellij.execution.configurations.ParametersList;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
+import com.intellij.psi.impl.source.PsiClassImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +30,27 @@ public class MethodBuilderService {
             result.add(builtMethod);
         }
 
+        if (containingClass instanceof PsiClassImpl) {
+            var methods = ((PsiClassImpl) containingClass).getOwnMethods();
+
+            for (var method : methods) {
+                var methodAnnotations = method.getAnnotations();
+
+                for (var annotation : methodAnnotations) {
+                    if (AnnotationEnum.LOG_IT.getFqn().equals(annotation.getQualifiedName())) {
+                        var logItMethod = buildLogITMethod(method);
+                        if (logItMethod != null) {
+                            result.add(logItMethod);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (containingClass.getImplementsList() != null && "MyService".equals(containingClass.getName())) {
+            System.out.println("hola");
+        }
+
         return result;
     }
 
@@ -46,6 +66,33 @@ public class MethodBuilderService {
                 .setContainingClass(containingClass)
                 .setNavigationElement(navigationElement);
 
+        if (hasAlreadyDeclaredMethod(methodBuilder)) {
+            return null;
+        }
+
+        return methodBuilder;
+    }
+
+    private PsiMethod buildLogITMethod(PsiMethod prototype) {
+        var manager = containingClass.getManager();
+
+        var methodBuilder = new LightMethodBuilderExtension(manager, prototype.getName());
+
+        methodBuilder
+                .withBodyText("return null;")
+                .addModifier(PsiModifier.PUBLIC)
+                .setMethodReturnType(prototype.getReturnType())
+                .setContainingClass(containingClass)
+                .setNavigationElement(prototype);
+
+        for (var exception : prototype.getThrowsList().getReferencedTypes()) {
+            methodBuilder.addException(exception);
+        }
+        for (var param : prototype.getParameterList().getParameters()) {
+            methodBuilder.addParameter(param);
+        }
+
+        methodBuilder.addParameter("currentUserId", "java.lang.String");
 
         if (hasAlreadyDeclaredMethod(methodBuilder)) {
             return null;
@@ -56,7 +103,7 @@ public class MethodBuilderService {
 
     private boolean hasAlreadyDeclaredMethod(PsiMethod psiMethod) {
         for (var child : containingClass.getChildren()) {
-            if (child instanceof PsiMethod) {
+            if (child instanceof LightMethodBuilderExtension) {
                 var currentMethod = (PsiMethod) child;
 
                 if (parameterListsEqual(currentMethod.getParameterList(), psiMethod.getParameterList())
