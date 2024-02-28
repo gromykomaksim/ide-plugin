@@ -3,10 +3,7 @@ package com.example.testplugin;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassImpl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class MethodBuilderService {
     private final PsiClass containingClass;
@@ -19,39 +16,91 @@ public class MethodBuilderService {
         List<PsiMethod> result = new ArrayList<>();
 
         for (var annotation : containingClass.getAnnotations()) {
-            PsiMethod builtMethod = null;
 
             if (AnnotationEnum.HELLO_WORLD.getFqn().equals(annotation.getQualifiedName())) {
-                builtMethod = buildHelloWorldMethod(annotation);
+                var helloWorldMethod = buildHelloWorldMethod(annotation);
+                if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, helloWorldMethod)) {
+                    result.add(helloWorldMethod);
+                }
             }
-
-            if (builtMethod == null) continue;
-
-            result.add(builtMethod);
         }
 
         if (containingClass instanceof PsiClassImpl) {
             var methods = ((PsiClassImpl) containingClass).getOwnMethods();
 
             for (var method : methods) {
-                var methodAnnotations = method.getAnnotations();
-
-                for (var annotation : methodAnnotations) {
-                    if (AnnotationEnum.LOG_IT.getFqn().equals(annotation.getQualifiedName())) {
-                        var logItMethod = buildLogITMethod(method);
-                        if (logItMethod != null) {
-                            result.add(logItMethod);
-                        }
+                if (isLogItMethod(method)) {
+                    var logItMethod = buildLogITMethod(method, true);
+                    if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
+                        result.add(logItMethod);
                     }
                 }
             }
         }
-
-        if (containingClass.getImplementsList() != null && "MyService".equals(containingClass.getName())) {
-            System.out.println("hola");
-        }
+        addLogItMethodsToInterfaceIfNeeded(containingClass, result);
 
         return result;
+    }
+
+    private boolean isLogItMethod(PsiMethod method) {
+        var annotations = method.getAnnotations();
+        for (var annotation : annotations) {
+            if (AnnotationEnum.LOG_IT.getFqn().equals(annotation.getQualifiedName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void addLogItMethodsToInterfaceIfNeeded(PsiClass psiClass, List<PsiMethod> result) {
+        var classesImplementors = new HashSet<PsiClass>();
+
+        try {
+            var highestParent = PsiService.getHighestParent(psiClass);
+            if (highestParent == null) return;
+
+            fillClassesImplementors(highestParent, classesImplementors);
+            classesImplementors.forEach(
+                    currentClass -> {
+                        var methods = ((PsiClassImpl) currentClass).getOwnMethods();
+
+                        methods.forEach(
+                                method -> {
+                                    if (isLogItMethod(method)) {
+                                        if (PsiUtil.hasAlreadyDeclaredMethod(containingClass, method)) {
+                                            var abstractLogItMethod = PsiUtil.getSameMethodFromClass(containingClass, method);
+                                            if (abstractLogItMethod == null) return;
+
+                                            var logItMethod = buildLogITMethod(abstractLogItMethod, false);
+
+                                            if (PsiUtil.hasAlreadyDeclaredMethod(containingClass, method)
+                                                    && !PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
+                                                System.out.println("Log it method built");
+                                                result.add(logItMethod);
+                                            }
+                                        }
+                                    }
+                                }
+                        );
+                    }
+            );
+        } catch (Throwable e) {
+            System.out.println("fail");
+            e.printStackTrace();
+        }
+    }
+
+    private void fillClassesImplementors(PsiElement currentNode, Set<PsiClass> classesImplementors) {
+        if (currentNode instanceof PsiClass) {
+            var currentClass = ((PsiClass) currentNode);
+
+            if (PsiUtil.containsInImplements(currentClass, containingClass)) {
+                classesImplementors.add(currentClass);
+            }
+        }
+        for (var childNode : currentNode.getChildren()) {
+            fillClassesImplementors(childNode, classesImplementors);
+        }
     }
 
     private PsiMethod buildHelloWorldMethod(PsiElement navigationElement) {
@@ -66,21 +115,20 @@ public class MethodBuilderService {
                 .setContainingClass(containingClass)
                 .setNavigationElement(navigationElement);
 
-        if (hasAlreadyDeclaredMethod(methodBuilder)) {
-            return null;
-        }
-
         return methodBuilder;
     }
 
-    private PsiMethod buildLogITMethod(PsiMethod prototype) {
+    private PsiMethod buildLogITMethod(PsiMethod prototype, boolean withBody) {
         var manager = containingClass.getManager();
 
         var methodBuilder = new LightMethodBuilderExtension(manager, prototype.getName());
 
-        methodBuilder
-                .withBodyText("return null;")
-                .addModifier(PsiModifier.PUBLIC)
+        if (withBody) {
+            methodBuilder
+                    .withBodyText("return null;");
+        }
+
+        methodBuilder.addModifier(PsiModifier.PUBLIC)
                 .setMethodReturnType(prototype.getReturnType())
                 .setContainingClass(containingClass)
                 .setNavigationElement(prototype);
@@ -94,32 +142,6 @@ public class MethodBuilderService {
 
         methodBuilder.addParameter("currentUserId", "java.lang.String");
 
-        if (hasAlreadyDeclaredMethod(methodBuilder)) {
-            return null;
-        }
-
         return methodBuilder;
-    }
-
-    private boolean hasAlreadyDeclaredMethod(PsiMethod psiMethod) {
-        for (var child : containingClass.getChildren()) {
-            if (child instanceof LightMethodBuilderExtension) {
-                var currentMethod = (PsiMethod) child;
-
-                if (parameterListsEqual(currentMethod.getParameterList(), psiMethod.getParameterList())
-                        && currentMethod.getName().equals(psiMethod.getName())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean parameterListsEqual(PsiParameterList paramList1, PsiParameterList paramList2) {
-        var filteredParamList1 = Arrays.stream(paramList1.getChildren()).filter(x -> !(x instanceof PsiJavaToken)).sorted().collect(Collectors.toList());
-        var filteredParamList2 = Arrays.stream(paramList2.getChildren()).filter(x -> !(x instanceof PsiJavaToken)).sorted().collect(Collectors.toList());
-
-        return filteredParamList1.equals(filteredParamList2);
     }
 }
