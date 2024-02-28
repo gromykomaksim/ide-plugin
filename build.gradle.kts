@@ -40,4 +40,11 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
+
+    jar {
+        enabled = true
+    }
+    runPluginVerifier {
+        ideVersions.set(listOf("IC-2021.3.3"))
+    }
 }
