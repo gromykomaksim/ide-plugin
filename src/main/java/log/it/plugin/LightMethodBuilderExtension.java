@@ -1,11 +1,9 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.light.LightMethodBuilder;
-import com.intellij.psi.impl.light.LightModifierList;
-import com.intellij.psi.impl.light.LightTypeParameterListBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public class LightMethodBuilderExtension extends LightMethodBuilder {

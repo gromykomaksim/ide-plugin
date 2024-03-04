@@ -1,4 +1,4 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassImpl;
@@ -47,7 +47,9 @@ public class PsiUtil {
         if (implementor.getImplementsList() == null) return false;
 
         for (var currentImpl : implementor.getImplementsList().getReferenceElements()) {
-            if (currentImpl.getQualifiedName().equals(implementation.getQualifiedName())) return true;
+            if (currentImpl.getQualifiedName() != null
+                    && implementation.getQualifiedName() != null
+                    && currentImpl.getQualifiedName().equals(implementation.getQualifiedName())) return true;
         }
         return false;
     }

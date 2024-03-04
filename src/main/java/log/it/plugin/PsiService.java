@@ -1,4 +1,4 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.impl.file.PsiJavaDirectoryImpl;

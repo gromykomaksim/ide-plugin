@@ -1,26 +1,11 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.*;
-import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.lang.Language;
-import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
-import com.intellij.psi.impl.compiled.ClsMethodImpl;
-import com.intellij.psi.impl.light.LightMethodBuilder;
-import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
-import com.intellij.psi.tree.IElementType;
 import com.intellij.ui.JBColor;
-import com.intellij.util.PlatformIcons;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayDeque;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class CompletionProviderExtension extends CompletionProvider<CompletionParameters> {

@@ -1,4 +1,4 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassImpl;
@@ -14,16 +14,6 @@ public class MethodBuilderService {
 
     public List<PsiMethod> buildMethods() {
         List<PsiMethod> result = new ArrayList<>();
-
-        for (var annotation : containingClass.getAnnotations()) {
-
-            if (AnnotationEnum.HELLO_WORLD.getFqn().equals(annotation.getQualifiedName())) {
-                var helloWorldMethod = buildHelloWorldMethod(annotation);
-                if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, helloWorldMethod)) {
-                    result.add(helloWorldMethod);
-                }
-            }
-        }
 
         if (containingClass instanceof PsiClassImpl) {
             var methods = ((PsiClassImpl) containingClass).getOwnMethods();
@@ -59,9 +49,12 @@ public class MethodBuilderService {
             var highestParent = PsiService.getHighestParent(psiClass);
             if (highestParent == null) return;
 
+            System.out.println("Pre fill part");
             fillClassesImplementors(highestParent, classesImplementors);
+            System.out.println("After fill part");
             classesImplementors.forEach(
                     currentClass -> {
+                        if (!(currentClass instanceof PsiClassImpl)) return;
                         var methods = ((PsiClassImpl) currentClass).getOwnMethods();
 
                         methods.forEach(
@@ -101,21 +94,6 @@ public class MethodBuilderService {
         for (var childNode : currentNode.getChildren()) {
             fillClassesImplementors(childNode, classesImplementors);
         }
-    }
-
-    private PsiMethod buildHelloWorldMethod(PsiElement navigationElement) {
-        var manager = containingClass.getManager();
-
-        var methodBuilder = new LightMethodBuilderExtension(manager, "helloWorld");
-
-        methodBuilder
-                .withBodyText("System.out.println(\"Hello world!\");\n")
-                .addModifier(PsiModifier.PUBLIC)
-                .setMethodReturnType(PsiType.VOID)
-                .setContainingClass(containingClass)
-                .setNavigationElement(navigationElement);
-
-        return methodBuilder;
     }
 
     private PsiMethod buildLogITMethod(PsiMethod prototype, boolean withBody) {

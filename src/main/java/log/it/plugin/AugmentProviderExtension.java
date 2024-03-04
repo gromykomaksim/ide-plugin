@@ -1,9 +1,7 @@
-package com.example.testplugin;
+package log.it.plugin;
 
-import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.psi.*;
 import com.intellij.psi.augment.PsiAugmentProvider;
-import com.intellij.psi.impl.light.LightMethodBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

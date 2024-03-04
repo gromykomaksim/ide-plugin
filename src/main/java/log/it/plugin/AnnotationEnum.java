@@ -1,8 +1,7 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 public enum AnnotationEnum {
-    HELLO_WORLD("org.example.HelloWorld"),
-    LOG_IT("org.example.LogIt");
+    LOG_IT("org.example.annotations.LogIt");
 
     private final String fqn;
 

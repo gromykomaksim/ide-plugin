@@ -25,7 +25,7 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <lang.psiAugmentProvider implementation="com.example.testplugin.AugmentProviderExtension"/>
-        <completion.contributor language="JAVA" implementationClass="com.example.testplugin.CompletionContributorExtension" order="first"/>
+        <lang.psiAugmentProvider implementation="log.it.plugin.AugmentProviderExtension"/>
+        <completion.contributor language="JAVA" implementationClass="log.it.plugin.CompletionContributorExtension" order="first"/>
     </extensions>
 </idea-plugin>

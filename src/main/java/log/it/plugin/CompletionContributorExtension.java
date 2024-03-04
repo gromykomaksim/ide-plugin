@@ -1,9 +1,8 @@
-package com.example.testplugin;
+package log.it.plugin;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.PlainTextTokenTypes;
 
 public class CompletionContributorExtension extends CompletionContributor {
     public CompletionContributorExtension () {
