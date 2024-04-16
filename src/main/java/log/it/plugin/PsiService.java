@@ -16,7 +16,6 @@ public class PsiService {
             }
             currentElement = currentElement.getParent();
         }
-        System.out.println("highest parent init");
         return currentElement;
     }
 }

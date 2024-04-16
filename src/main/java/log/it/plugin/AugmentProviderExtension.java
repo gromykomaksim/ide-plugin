@@ -2,6 +2,7 @@ package log.it.plugin;
 
 import com.intellij.psi.*;
 import com.intellij.psi.augment.PsiAugmentProvider;
+import com.intellij.psi.impl.source.PsiClassImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,8 +17,8 @@ public class AugmentProviderExtension extends PsiAugmentProvider {
                                                           @Nullable String nameHint) {
         final List<Psi> emptyResult = Collections.emptyList();
 
-        if (element instanceof PsiClass && type == PsiMethod.class) {
-            var currentClass = (PsiClass) element;
+        if (element instanceof PsiClassImpl && type == PsiMethod.class) {
+            var currentClass = (PsiClassImpl) element;
 
             return (List<Psi>)(new MethodBuilderService(currentClass).buildMethods());
         }

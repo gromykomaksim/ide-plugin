@@ -6,7 +6,6 @@ import com.intellij.patterns.PlatformPatterns;
 
 public class CompletionContributorExtension extends CompletionContributor {
     public CompletionContributorExtension () {
-        System.out.println("Init");
         extend(CompletionType.BASIC, PlatformPatterns.not(PlatformPatterns.alwaysFalse()),
                 new CompletionProviderExtension());
     }

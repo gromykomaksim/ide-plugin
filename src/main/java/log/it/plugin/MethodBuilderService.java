@@ -2,32 +2,39 @@ package log.it.plugin;
 
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassImpl;
+import com.intellij.psi.search.searches.ClassInheritorsSearch;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class MethodBuilderService {
-    private final PsiClass containingClass;
+    private final PsiClassImpl containingClass;
+    private final LocalDateTime currentTimeMark = LocalDateTime.now();
 
-    public MethodBuilderService(PsiClass containingClass) {
+    public MethodBuilderService(PsiClassImpl containingClass) {
+        System.out.println(containingClass + " init");
         this.containingClass = containingClass;
     }
 
     public List<PsiMethod> buildMethods() {
         List<PsiMethod> result = new ArrayList<>();
 
-        if (containingClass instanceof PsiClassImpl) {
-            var methods = ((PsiClassImpl) containingClass).getOwnMethods();
+        var methods = containingClass.getOwnMethods();
 
-            for (var method : methods) {
-                if (isLogItMethod(method)) {
-                    var logItMethod = buildLogITMethod(method, true);
-                    if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
-                        result.add(logItMethod);
-                    }
+        for (var method : methods) {
+            if (isLogItMethod(method)) {
+                var logItMethod = buildLogITMethod(method, true);
+                if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
+                    result.add(logItMethod);
                 }
             }
         }
+
+        Util.printExecTime("Additional methods built", currentTimeMark);
+
         addLogItMethodsToInterfaceIfNeeded(containingClass, result);
+
+        Util.printExecTime("Whole process is finished", currentTimeMark);
 
         return result;
     }
@@ -43,18 +50,15 @@ public class MethodBuilderService {
     }
 
     private void addLogItMethodsToInterfaceIfNeeded(PsiClass psiClass, List<PsiMethod> result) {
-        var classesImplementors = new HashSet<PsiClass>();
 
         try {
             var highestParent = PsiService.getHighestParent(psiClass);
             if (highestParent == null) return;
 
-            System.out.println("Pre fill part");
-            fillClassesImplementors(highestParent, classesImplementors);
-            System.out.println("After fill part");
-            classesImplementors.forEach(
+            var classImplementors = ClassInheritorsSearch.search(psiClass);
+            Util.printExecTime("Implementors found", currentTimeMark);
+            classImplementors.forEach(
                     currentClass -> {
-                        if (!(currentClass instanceof PsiClassImpl)) return;
                         var methods = ((PsiClassImpl) currentClass).getOwnMethods();
 
                         methods.forEach(
@@ -68,7 +72,6 @@ public class MethodBuilderService {
 
                                             if (PsiUtil.hasAlreadyDeclaredMethod(containingClass, method)
                                                     && !PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
-                                                System.out.println("Log it method built");
                                                 result.add(logItMethod);
                                             }
                                         }
@@ -77,22 +80,10 @@ public class MethodBuilderService {
                         );
                     }
             );
+            Util.printExecTime("Interface methods built", currentTimeMark);
         } catch (Throwable e) {
-            System.out.println("fail");
+            Util.printExecTime("fail", currentTimeMark);
             e.printStackTrace();
-        }
-    }
-
-    private void fillClassesImplementors(PsiElement currentNode, Set<PsiClass> classesImplementors) {
-        if (currentNode instanceof PsiClass) {
-            var currentClass = ((PsiClass) currentNode);
-
-            if (PsiUtil.containsInImplements(currentClass, containingClass)) {
-                classesImplementors.add(currentClass);
-            }
-        }
-        for (var childNode : currentNode.getChildren()) {
-            fillClassesImplementors(childNode, classesImplementors);
         }
     }
 
