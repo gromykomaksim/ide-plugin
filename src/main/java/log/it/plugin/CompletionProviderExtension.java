@@ -7,14 +7,10 @@ import com.intellij.ui.JBColor;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDateTime;
-
 
 public class CompletionProviderExtension extends CompletionProvider<CompletionParameters> {
     @Override
     public void addCompletions(@NotNull CompletionParameters parameters, @NotNull ProcessingContext context, @NotNull CompletionResultSet result) {
-        LocalDateTime mark1 = LocalDateTime.now();
-
         result.runRemainingContributors(parameters, completionResult -> {
             LookupElement lookupElement = completionResult.getLookupElement();
             PsiElement psiElement = lookupElement.getPsiElement();
@@ -34,8 +30,9 @@ public class CompletionProviderExtension extends CompletionProvider<CompletionPa
                 result.passResult(completionResult);
             }
 
+            result.passResult(completionResult);
         });
 
-        Util.printExecTime("Customization complete", mark1);
+//        Util.printExecTime("Customization complete", mark1);
     }
 }

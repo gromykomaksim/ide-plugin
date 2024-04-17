@@ -9,10 +9,9 @@ import java.util.*;
 
 public class MethodBuilderService {
     private final PsiClassImpl containingClass;
-    private final LocalDateTime currentTimeMark = LocalDateTime.now();
 
     public MethodBuilderService(PsiClassImpl containingClass) {
-        System.out.println(containingClass + " init");
+//        System.out.println(containingClass + " init");
         this.containingClass = containingClass;
     }
 
@@ -30,11 +29,11 @@ public class MethodBuilderService {
             }
         }
 
-        Util.printExecTime("Additional methods built", currentTimeMark);
+//        Util.printExecTime("Additional methods built", currentTimeMark);
 
         addLogItMethodsToInterfaceIfNeeded(containingClass, result);
 
-        Util.printExecTime("Whole process is finished", currentTimeMark);
+//        Util.printExecTime("Whole process is finished", currentTimeMark);
 
         return result;
     }
@@ -56,7 +55,7 @@ public class MethodBuilderService {
             if (highestParent == null) return;
 
             var classImplementors = ClassInheritorsSearch.search(psiClass);
-            Util.printExecTime("Implementors found", currentTimeMark);
+//            Util.printExecTime("Implementors found", currentTimeMark);
             classImplementors.forEach(
                     currentClass -> {
                         var methods = ((PsiClassImpl) currentClass).getOwnMethods();
@@ -80,9 +79,9 @@ public class MethodBuilderService {
                         );
                     }
             );
-            Util.printExecTime("Interface methods built", currentTimeMark);
+//            Util.printExecTime("Interface methods built", currentTimeMark);
         } catch (Throwable e) {
-            Util.printExecTime("fail", currentTimeMark);
+//            Util.printExecTime("fail", currentTimeMark);
             e.printStackTrace();
         }
     }

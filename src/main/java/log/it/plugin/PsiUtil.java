@@ -42,15 +42,4 @@ public class PsiUtil {
 
         return null;
     }
-
-    public static boolean containsInImplements(PsiClass implementor, PsiClass implementation) {
-        if (implementor.getImplementsList() == null) return false;
-
-        for (var currentImpl : implementor.getImplementsList().getReferenceElements()) {
-            if (currentImpl.getQualifiedName() != null
-                    && implementation.getQualifiedName() != null
-                    && currentImpl.getQualifiedName().equals(implementation.getQualifiedName())) return true;
-        }
-        return false;
-    }
 }
