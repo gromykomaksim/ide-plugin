@@ -1,7 +1,7 @@
 package log.it.plugin;
 
 public enum AnnotationEnum {
-    LOG_IT("org.example.annotations.LogIt");
+    LOG_IT("log.it.annotations.LogIt");
 
     private final String fqn;
 

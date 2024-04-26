@@ -4,7 +4,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassImpl;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class MethodBuilderService {
@@ -23,7 +22,7 @@ public class MethodBuilderService {
         for (var method : methods) {
             if (isLogItMethod(method)) {
                 var logItMethod = buildLogITMethod(method, true);
-                if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
+                if (!PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod) && !result.contains(logItMethod)) {
                     result.add(logItMethod);
                 }
             }
@@ -70,7 +69,8 @@ public class MethodBuilderService {
                                             var logItMethod = buildLogITMethod(abstractLogItMethod, false);
 
                                             if (PsiUtil.hasAlreadyDeclaredMethod(containingClass, method)
-                                                    && !PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)) {
+                                                    && !PsiUtil.hasAlreadyDeclaredMethod(containingClass, logItMethod)
+                                                    && result.contains(logItMethod)) {
                                                 result.add(logItMethod);
                                             }
                                         }

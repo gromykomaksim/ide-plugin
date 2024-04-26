@@ -24,7 +24,6 @@ public class CompletionProviderExtension extends CompletionProvider<CompletionPa
                         presentation.setItemTextForeground(JBColor.ORANGE);
                     }
                 });
-
                 result.passResult(completionResult.withLookupElement(finalLookupElement));
             } else {
                 result.passResult(completionResult);
